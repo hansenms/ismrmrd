@@ -119,15 +119,15 @@ bool operator==(const ImageHeader& h1, const ImageHeader& h2)
 template <typename T> Acquisition<T>::Acquisition(uint32_t num_samples, uint32_t active_channels, uint32_t trajectory_dimensions)
 {
     memset(&head_, 0, sizeof(head_));
-    head_.version = ISMRMRD_VERSION_MAJOR;
+    head_.signature = ISMRMRD_SIGNATURE;
     head_.entity_type = ISMRMRD_MRACQUISITION;
     head_.storage_type = get_storage_type<T>();
     this->resize(num_samples, active_channels, trajectory_dimensions);
 }
 
 // Accessors and mutators
-template <typename T> uint32_t Acquisition<T>::getVersion() const {
-    return head_.version;
+template <typename T> uint32_t Acquisition<T>::getSignature() const {
+    return head_.signature;
 }
 
 template <typename T> StorageType Acquisition<T>::getStorageType() const {
@@ -633,7 +633,7 @@ template <typename T> Image<T>::Image(uint32_t matrix_size_x,
                                       uint32_t channels)
 {
     memset(&head_, 0, sizeof(head_));
-    head_.version = ISMRMRD_VERSION_MAJOR;
+    head_.signature = ISMRMRD_SIGNATURE;
     head_.entity_type = ISMRMRD_IMAGE;
     head_.storage_type = static_cast<uint32_t>(get_storage_type<T>());
     this->resize(matrix_size_x, matrix_size_y, matrix_size_z, channels);
@@ -939,9 +939,9 @@ template <typename T> void Image<T>::setPatientTablePositionZ(float z)
     head_.patient_table_position[2] = z;
 }
 
-template <typename T> uint32_t Image<T>::getVersion() const
+template <typename T> uint32_t Image<T>::getSignature() const
 {
-    return head_.version;
+    return head_.signature;
 }
 
 template <typename T> StorageType Image<T>::getStorageType() const
@@ -1236,17 +1236,17 @@ template <typename T>  void Image<T>::deserialize(const std::vector<unsigned cha
 // Array class Implementation
 //
 template <typename T> NDArray<T>::NDArray()
-    : version_(ISMRMRD_VERSION_MAJOR)
+    : signature_(ISMRMRD_SIGNATURE)
 { }
 
 template <typename T> NDArray<T>::NDArray(const std::vector<size_t>& dims)
-    : version_(ISMRMRD_VERSION_MAJOR)
+    : signature_(ISMRMRD_SIGNATURE)
 {
     resize(dims);
 }
 
-template <typename T> uint32_t NDArray<T>::getVersion() const {
-    return version_;
+template <typename T> uint32_t NDArray<T>::getSignature() const {
+    return signature_;
 };
 
 template <typename T> StorageType NDArray<T>::getStorageType() const {

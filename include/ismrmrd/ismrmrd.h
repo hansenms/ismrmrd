@@ -7,26 +7,9 @@
 /*    Souheil Inati     (souheil.inati@nih.gov)            */
 /*    Joseph Naegele    (joseph.naegele@nih.gov)           */
 
-/**
- * @file ismrmrd.h
- */
-
 #pragma once
 #ifndef ISMRMRD_H
 #define ISMRMRD_H
-
-#ifdef _MSC_VER /* MS compiler */
-#ifndef HAS_INT_TYPE
-typedef __int16 int16_t;
-typedef unsigned __int16 uint16_t;
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-#endif /* HAS_INT_TYPE */
-#else  /* non MS C or C++ compiler */
-#include <stdint.h>
-#endif /* _MSC_VER */
 
 #include <complex>
 #include <vector>
@@ -35,6 +18,8 @@ typedef unsigned __int64 uint64_t;
 #include "ismrmrd/export.h"
 
 #pragma pack(push, 2) /* Use 2 byte alignment */
+
+#define ISMRMRD_SIGNATURE 0x15E8E002
 
 namespace ISMRMRD {
 
@@ -140,7 +125,7 @@ enum ImageFlags {
 };
 
 struct EntityHeader {
-    uint32_t version;       /**< First unsigned int indicates the version */
+    uint32_t signature;     /**< First unsigned int indicates the signature, defined in ISMRMRD_SIGNATURE */
     uint32_t entity_type;   /**< Entity type code */
     uint32_t storage_type;  /**< numeric type of each sample */
     uint32_t stream;        /**< which stream this belongs to */
@@ -163,7 +148,7 @@ struct EncodingCounters {
 
 /** Header for each MR acquisition. */
 struct AcquisitionHeader {
-    uint32_t version;                                    /**< First unsigned int indicates the version  */
+    uint32_t signature;                                  /**< First unsigned int indicates the signature  */
     uint32_t entity_type;                                /**< Entity type code */
     uint32_t storage_type;                               /**< numeric type of each sample */
     uint32_t stream;                                     /**< which stream this belongs to */
@@ -193,7 +178,7 @@ struct AcquisitionHeader {
 
 /** Header for each Image. */
 struct ImageHeader {
-    uint32_t version;                                    /**< First unsigned int indicates the version */
+    uint32_t signature;                                  /**< First unsigned int indicates the signature */
     uint32_t entity_type;                                /**< Entity type code */
     uint32_t storage_type;                               /**< numeric type of each sample */
     uint32_t stream;                                     /**< which stream this belongs to */
@@ -268,7 +253,7 @@ template <typename T> class EXPORTISMRMRD Acquisition
 public:
     Acquisition(uint32_t num_samples = 0, uint32_t active_channels = 1, uint32_t trajectory_dimensions = 0);
 
-    uint32_t getVersion() const;
+    uint32_t getSignature() const;
 
     StorageType getStorageType() const;
 
@@ -489,7 +474,7 @@ public:
     void setPatientTablePositionZ(float z);
 
     // Attributes
-    uint32_t getVersion() const;
+    uint32_t getSignature() const;
 
     StorageType getStorageType() const;
 
@@ -582,7 +567,7 @@ public:
     NDArray(const std::vector<size_t> &dims);
 
     // Accessors and mutators
-    uint32_t getVersion() const;
+    uint32_t getSignature() const;
     StorageType getStorageType() const;
 
     uint32_t getNDim() const;
@@ -600,7 +585,7 @@ public:
 protected:
     void makeConsistent();
 
-    uint32_t version_;
+    uint32_t signature_;
     std::vector<size_t> dims_;
     std::vector<T> data_;
 };

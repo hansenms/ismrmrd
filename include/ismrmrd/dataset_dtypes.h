@@ -71,7 +71,7 @@ template <> DataType get_hdf5_data_type<AcquisitionHeader>()
 {
     CompType dtype(sizeof(AcquisitionHeader));
 
-    dtype.insertMember("version", HOFFSET(AcquisitionHeader, version),  PredType::NATIVE_UINT32);
+    dtype.insertMember("signature", HOFFSET(AcquisitionHeader, signature),  PredType::NATIVE_UINT32);
     dtype.insertMember("entity_type", HOFFSET(AcquisitionHeader, entity_type),  PredType::NATIVE_UINT32);
     dtype.insertMember("storage_type", HOFFSET(AcquisitionHeader, storage_type),  PredType::NATIVE_UINT32);
     dtype.insertMember("stream", HOFFSET(AcquisitionHeader, stream),  PredType::NATIVE_UINT32);
