@@ -15,6 +15,8 @@ Questions
 
 Next steps
 ----------
+* Change complex storage to compound type
+* 
 
 * Add Entity interface (serialization/deserialization).
 * Add HDF5 code for images

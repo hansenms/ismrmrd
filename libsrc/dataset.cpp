@@ -154,15 +154,8 @@ template <typename T> void Dataset::appendAcquisition(const Acquisition<T>& acq,
     obj.head = acq.getHead();
     obj.traj.len = acq.getTrajectoryDimensions() * acq.getNumberOfSamples();
     obj.traj.p = const_cast<float*>(&acq.getTraj()[0]);
-    obj.data.len = acq.getActiveChannels() * acq.getNumberOfSamples() * 2;
-
-    std::vector<T> fdata;
-    std::vector<std::complex<T> > data = acq.getData();
-    for (typename std::vector<std::complex<T> >::const_iterator it = data.begin(); it != data.end(); ++it) {
-        fdata.push_back(it->real());
-        fdata.push_back(it->imag());
-    }
-    obj.data.p = const_cast<T*>(&fdata[0]);
+    obj.data.len = acq.getActiveChannels() * acq.getNumberOfSamples();
+    obj.data.p = const_cast<std::complex<T>*>(&acq.getData()[0]);
 
     // add the acquisition to its correct stream dataset
     // note: subtract 1 to account for zero-indexing
@@ -300,7 +293,7 @@ template <typename T> Acquisition<T> Dataset::readAcquisition(unsigned long inde
     Acquisition<T> acq;
     acq.setHead(obj.head);
 
-    if (obj.data.len != acq.getData().size() * 2) {
+    if (obj.data.len != acq.getData().size()) {
         throw std::runtime_error("Header does not match data length in file");
     }
     if (obj.traj.len != acq.getTraj().size()) {
@@ -308,7 +301,7 @@ template <typename T> Acquisition<T> Dataset::readAcquisition(unsigned long inde
     }
 
     // TODO: fix this ASAP:
-    memcpy(const_cast<std::complex<T>*>(&acq.getData()[0]), obj.data.p, sizeof(T) * obj.data.len);
+    memcpy(const_cast<std::complex<T>*>(&acq.getData()[0]), obj.data.p, sizeof(T) * obj.data.len * 2);
     memcpy(const_cast<float*>(&acq.getTraj()[0]), obj.traj.p, sizeof(float) * obj.traj.len);
 
     free(obj.data.p);

@@ -220,6 +220,8 @@ bool operator==(const ImageHeader &h1, const ImageHeader &h2);
 class EXPORTISMRMRD Entity
 {
  public:
+	virtual ~Entity() {}
+
     virtual std::vector<unsigned char> serialize() = 0;
     virtual void deserialize(const std::vector<unsigned char>& buffer) = 0;
 };
@@ -252,6 +254,7 @@ template <typename T> class EXPORTISMRMRD Acquisition
 {
 public:
     Acquisition(uint32_t num_samples = 0, uint32_t active_channels = 1, uint32_t trajectory_dimensions = 0);
+    virtual ~Acquisition() {}
 
     uint32_t getSignature() const;
 

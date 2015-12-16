@@ -35,6 +35,84 @@ struct IndexEntry
 template <typename T>
 DataType get_hdf5_data_type();
 
+template <> DataType get_hdf5_data_type<char>()
+{
+	return DataType(PredType::NATIVE_CHAR);
+}
+
+template <> DataType get_hdf5_data_type<uint16_t>()
+{
+	return DataType(PredType::NATIVE_UINT16);
+}
+
+template <> DataType get_hdf5_data_type<int16_t>()
+{
+	return DataType(PredType::NATIVE_INT16);
+}
+
+template <> DataType get_hdf5_data_type<uint32_t>()
+{
+	return DataType(PredType::NATIVE_UINT32);
+}
+
+template <> DataType get_hdf5_data_type<int32_t>()
+{
+	return DataType(PredType::NATIVE_INT32);
+}
+
+template <> DataType get_hdf5_data_type<uint64_t>()
+{
+	return DataType(PredType::NATIVE_UINT64);
+}
+
+template <> DataType get_hdf5_data_type<int64_t>()
+{
+	return DataType(PredType::NATIVE_INT64);
+}
+
+template <> DataType get_hdf5_data_type<float>()
+{
+	return DataType(PredType::NATIVE_FLOAT);
+}
+
+
+template <> DataType get_hdf5_data_type<double>()
+{
+	return DataType(PredType::NATIVE_DOUBLE);
+}
+
+template <> DataType get_hdf5_data_type< std::complex<int16_t> >()
+{
+    CompType dtype(sizeof(std::complex<int16_t>));
+    dtype.insertMember("real", 0, PredType::NATIVE_INT16);
+    dtype.insertMember("imag", sizeof(int16_t), PredType::NATIVE_INT16);
+	return dtype;
+}
+
+template <> DataType get_hdf5_data_type< std::complex<int32_t> >()
+{
+    CompType dtype(sizeof(std::complex<int32_t>));
+    dtype.insertMember("real", 0, PredType::NATIVE_INT32);
+    dtype.insertMember("imag", sizeof(int32_t), PredType::NATIVE_INT32);
+	return dtype;
+}
+
+template <> DataType get_hdf5_data_type< std::complex<float> >()
+{
+    CompType dtype(sizeof(std::complex<float>));
+    dtype.insertMember("real", 0, PredType::NATIVE_FLOAT);
+    dtype.insertMember("imag", sizeof(float), PredType::NATIVE_FLOAT);
+	return dtype;
+}
+
+template <> DataType get_hdf5_data_type< std::complex<double> >()
+{
+    CompType dtype(sizeof(std::complex<double>));
+    dtype.insertMember("real", 0, PredType::NATIVE_DOUBLE);
+    dtype.insertMember("imag", sizeof(double), PredType::NATIVE_DOUBLE);
+	return dtype;
+}
+
 template <> DataType get_hdf5_data_type<IndexEntry>()
 {
     CompType dtype(sizeof(IndexEntry));
@@ -130,51 +208,152 @@ template <> DataType get_hdf5_data_type<AcquisitionHeader>()
     return dtype;
 }
 
-template <> DataType get_hdf5_data_type<AcquisitionHeader_with_data<float> >()
+template <typename T> DataType get_hdf5_acquisition_data_type()
 {
-    CompType dtype(sizeof(AcquisitionHeader_with_data<float>));
+    CompType dtype(sizeof(AcquisitionHeader_with_data<T>));
 
     DataType head_type = get_hdf5_data_type<AcquisitionHeader>();
+    DataType traj_type = DataType(H5Tvlen_create(get_hdf5_data_type<float>().getId()));
+    DataType cplx_type = DataType(H5Tvlen_create(get_hdf5_data_type< std::complex<T> >().getId()));
 
-    DataType realv_type = DataType(H5Tvlen_create(PredType::NATIVE_FLOAT.getId()));
-
-    dtype.insertMember("head", HOFFSET(AcquisitionHeader_with_data<float>, head), head_type);
-    dtype.insertMember("traj", HOFFSET(AcquisitionHeader_with_data<float>, traj), realv_type);
-    dtype.insertMember("data", HOFFSET(AcquisitionHeader_with_data<float>, data), realv_type);
+    dtype.insertMember("head", HOFFSET(AcquisitionHeader_with_data<T>, head), head_type);
+    dtype.insertMember("traj", HOFFSET(AcquisitionHeader_with_data<T>, traj), traj_type);
+    dtype.insertMember("data", HOFFSET(AcquisitionHeader_with_data<T>, data), cplx_type);
 
     return dtype;
+}
+
+template <> DataType get_hdf5_data_type<AcquisitionHeader_with_data<float> >()
+{
+	return get_hdf5_acquisition_data_type<float>();
 }
 
 template <> DataType get_hdf5_data_type<AcquisitionHeader_with_data<int16_t> >()
 {
-    CompType dtype(sizeof(AcquisitionHeader_with_data<int16_t>));
-
-    DataType head_type = get_hdf5_data_type<AcquisitionHeader>();
-
-    DataType realv_float_type = DataType(H5Tvlen_create(PredType::NATIVE_FLOAT.getId()));
-    DataType realv_int_type = DataType(H5Tvlen_create(PredType::NATIVE_INT16.getId()));
-
-    dtype.insertMember("head", HOFFSET(AcquisitionHeader_with_data<int16_t>, head), head_type);
-    dtype.insertMember("traj", HOFFSET(AcquisitionHeader_with_data<int16_t>, traj), realv_float_type);
-    dtype.insertMember("data", HOFFSET(AcquisitionHeader_with_data<int16_t>, data), realv_int_type);
-
-    return dtype;
+	return get_hdf5_acquisition_data_type<int16_t>();
 }
 
 template <> DataType get_hdf5_data_type<AcquisitionHeader_with_data<int32_t> >()
 {
-    CompType dtype(sizeof(AcquisitionHeader_with_data<int32_t>));
+	return get_hdf5_acquisition_data_type<int32_t>();
+}
 
-    DataType head_type = get_hdf5_data_type<AcquisitionHeader>();
+template <> DataType get_hdf5_data_type<ImageHeader>()
+{
+    CompType dtype(sizeof(ImageHeader));
 
-    DataType realv_float_type = DataType(H5Tvlen_create(PredType::NATIVE_FLOAT.getId()));
-    DataType realv_int_type = DataType(H5Tvlen_create(PredType::NATIVE_INT32.getId()));
+    dtype.insertMember("signature", HOFFSET(ImageHeader, signature),  PredType::NATIVE_UINT32);
+    dtype.insertMember("entity_type", HOFFSET(ImageHeader, entity_type),  PredType::NATIVE_UINT32);
+    dtype.insertMember("storage_type", HOFFSET(ImageHeader, storage_type),  PredType::NATIVE_UINT32);
+    dtype.insertMember("stream", HOFFSET(ImageHeader, stream),  PredType::NATIVE_UINT32);
+    dtype.insertMember("time_stamp", HOFFSET(ImageHeader, time_stamp),  PredType::NATIVE_UINT64);
+    dtype.insertMember("flags",  HOFFSET(ImageHeader, flags),  PredType::NATIVE_UINT64);
 
-    dtype.insertMember("head", HOFFSET(AcquisitionHeader_with_data<int32_t>, head), head_type);
-    dtype.insertMember("traj", HOFFSET(AcquisitionHeader_with_data<int32_t>, traj), realv_float_type);
-    dtype.insertMember("data", HOFFSET(AcquisitionHeader_with_data<int32_t>, data), realv_int_type);
+    std::vector<hsize_t> dims(1, 3);
+    DataType matrix_array_type = ArrayType(PredType::NATIVE_UINT32, 1, &dims[0]);
+    dtype.insertMember("matrix_size", HOFFSET(ImageHeader, matrix_size), matrix_array_type);
+    DataType fov_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("field_of_view", HOFFSET(ImageHeader, field_of_view), matrix_array_type);
+    dtype.insertMember("channels",  HOFFSET(ImageHeader, channels),  PredType::NATIVE_UINT32);
+
+    dims[0] = ISMRMRD_POSITION_LENGTH;
+    DataType position_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("position",  HOFFSET(ImageHeader, position), position_array_type);
+
+    dims[0] = ISMRMRD_POSITION_LENGTH;
+    DataType read_dir_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("read_dir",  HOFFSET(ImageHeader, read_dir), read_dir_array_type);
+
+    dims[0] = ISMRMRD_POSITION_LENGTH;
+    DataType phase_dir_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("phase_dir",  HOFFSET(ImageHeader, phase_dir), phase_dir_array_type);
+
+    dims[0] = ISMRMRD_POSITION_LENGTH;
+    DataType slice_dir_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("slice_dir",  HOFFSET(ImageHeader, slice_dir), slice_dir_array_type);
+
+    dims[0] = ISMRMRD_POSITION_LENGTH;
+    DataType table_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("patient_table_position",  HOFFSET(ImageHeader, patient_table_position), table_array_type);
+
+    dtype.insertMember("average",  HOFFSET(ImageHeader, average),  PredType::NATIVE_UINT32);
+    dtype.insertMember("slice",  HOFFSET(ImageHeader, slice),  PredType::NATIVE_UINT32);
+    dtype.insertMember("phase",  HOFFSET(ImageHeader, phase),  PredType::NATIVE_UINT32);
+    dtype.insertMember("repetition",  HOFFSET(ImageHeader, repetition),  PredType::NATIVE_UINT32);
+    dtype.insertMember("set",  HOFFSET(ImageHeader, set),  PredType::NATIVE_UINT32);
+
+    dims[0] = ISMRMRD_PHYS_STAMPS;
+    DataType array_type = ArrayType(PredType::NATIVE_UINT32, 1, &dims[0]);
+    dtype.insertMember("physiology_time_stamp", HOFFSET(ImageHeader, physiology_time_stamp), array_type);
+
+    dtype.insertMember("image_type",  HOFFSET(ImageHeader, image_type),  PredType::NATIVE_UINT32);
+    dtype.insertMember("image_index",  HOFFSET(ImageHeader, image_index),  PredType::NATIVE_UINT32);
+    dtype.insertMember("image_series_index",  HOFFSET(ImageHeader, image_series_index),  PredType::NATIVE_UINT32);
+
+    dims[0] = ISMRMRD_USER_INTS;
+    DataType user_int_array_type = ArrayType(PredType::NATIVE_INT32, 1, &dims[0]);
+    dtype.insertMember("user_int",  HOFFSET(ImageHeader, user_int), user_int_array_type);
+
+    dims[0] = ISMRMRD_USER_FLOATS;
+    DataType user_float_array_type = ArrayType(PredType::NATIVE_FLOAT, 1, &dims[0]);
+    dtype.insertMember("user_float",  HOFFSET(ImageHeader, user_float), user_float_array_type);
+
+    dtype.insertMember("attribute_string_len",  HOFFSET(ImageHeader, attribute_string_len),  PredType::NATIVE_UINT32);
 
     return dtype;
+}
+
+template <typename T> DataType get_hdf5_image_data_type()
+{
+    CompType dtype(sizeof(ImageHeader_with_data<T>));
+
+    DataType head_type = get_hdf5_data_type<ImageHeader>();
+    DataType data_type = DataType(H5Tvlen_create(get_hdf5_data_type<T>().getId()));
+
+    dtype.insertMember("head", HOFFSET(ImageHeader_with_data<T>, head), head_type);
+    dtype.insertMember("data", HOFFSET(ImageHeader_with_data<T>, data), data_type);
+
+    return dtype;
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data<uint16_t> >()
+{
+	return get_hdf5_image_data_type<uint16_t>();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data<int16_t> >()
+{
+	return get_hdf5_image_data_type<uint16_t>();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data<uint32_t> >()
+{
+	return get_hdf5_image_data_type<uint32_t>();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data<int32_t> >()
+{
+	return get_hdf5_image_data_type<int32_t>();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data<float> >()
+{
+	return get_hdf5_image_data_type<float>();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data<double> >()
+{
+	return get_hdf5_image_data_type<double>();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data< std::complex<float> > >()
+{
+	return get_hdf5_image_data_type<std::complex<float> >();
+}
+
+template <> DataType get_hdf5_data_type<ImageHeader_with_data< std::complex<double> > >()
+{
+	return get_hdf5_image_data_type<std::complex<double> >();
 }
 
 } // namespace ISMRMRD
